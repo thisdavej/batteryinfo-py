@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use std::fmt;
 
 /// Represents a measurement with a value, units, and precision.
 #[pyclass]
@@ -10,6 +11,18 @@ pub struct Measurement {
     pub units: String,
     /// The number of decimal places to display.
     pub decimals: usize,
+}
+
+impl Measurement {
+    /// A private helper method to format the measurement as a string.
+    fn format_measurement(&self) -> String {
+        let formatted_value = format!("{:.precision$}", self.value, precision = self.decimals);
+        if self.units == "%" {
+            format!("{}{}", formatted_value, self.units)
+        } else {
+            format!("{} {}", formatted_value, self.units)
+        }
+    }
 }
 
 #[pymethods]
@@ -46,14 +59,7 @@ impl Measurement {
     ///
     /// If the unit is percent, the value and unit are formatted without a space between them.
     pub fn formatted(&self) -> PyResult<String> {
-        let formatted_value = format!("{:.precision$}", self.value, precision = self.decimals);
-        let formatted_output = if self.units == "%" {
-            format!("{}{}", formatted_value, self.units)
-        } else {
-            format!("{} {}", formatted_value, self.units)
-        };
-
-        Ok(formatted_output)
+        Ok(self.format_measurement())
     }
 
     /// Returns a string representation of the measurement.
@@ -61,5 +67,11 @@ impl Measurement {
     /// This method is used by Python's `repr()` function.
     fn __repr__(&self) -> PyResult<String> {
         self.formatted()
+    }
+}
+
+impl fmt::Display for Measurement {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.format_measurement())
     }
 }

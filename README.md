@@ -1,6 +1,6 @@
 # batteryinfo
 
-This project provides Python bindings for the Rust `battery` crate, allowing interaction with system batteries, including retrieving information about battery status, capacity, temperature, and more.
+This project provides cross-platform Python bindings specifically designed to access system battery information. Using the Rust `battery` crate as its foundation, it allows you to retrieve battery status, percent full, capacity, and more, regardless of the operating system.
 
 ## Setup
 
@@ -156,6 +156,44 @@ The following enums are available:
 
 - `DegC`: Display temperature in degrees Celsius.
 - `DegF`: Display temperature in degrees Fahrenheit.
+
+### Using the `as_dict` Method
+
+The `as_dict` method returns all battery information as a Python dictionary. For fields represented by `Measurement` objects, the method returns a tuple `(value, units)`.
+
+```python
+# Get all battery information as a dictionary
+battery_info = battery.as_dict()
+
+# Print the dictionary
+print(battery_info)
+
+# Example output:
+# {
+#     "vendor": "BatteryVendor",
+#     "model": "BatteryModel",
+#     "serial_number": "123456789",
+#     "technology": "Li-ion",
+#     "percent": (71.1, "%"),
+#     "state": "Charging",
+#     "capacity": (95.0, "%"),
+#     "temperature": (86.2, "°F"),
+#     "cycle_count": 300,
+#     "energy": (50.0, "Wh"),
+#     "energy_full": (60.0, "Wh"),
+#     "energy_full_design": (65.0, "Wh"),
+#     "energy_rate": (10.0, "W"),
+#     "voltage": (12.5, "V"),
+#     "time_to_empty": None,
+#     "time_to_full": "1h,5m,19s",
+#     "battery_index": 0
+# }
+
+# Access specific fields
+print("Vendor:", battery_info.get("vendor"))
+print("Percent:", battery_info.get("percent"))  # Example: (71.1, "%")
+print("Energy:", battery_info.get("energy"))    # Example: (50.0, "Wh")
+```
 
 ### Python Example - Displaying Battery Information Based on State
 

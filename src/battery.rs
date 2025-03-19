@@ -1,3 +1,4 @@
+use battery::Manager;
 use battery::units::{
     electric_potential::volt,
     energy::watt_hour,
@@ -5,9 +6,9 @@ use battery::units::{
     ratio::percent,
     thermodynamic_temperature::{degree_celsius, degree_fahrenheit},
 };
-use battery::Manager;
 use human_time::ToHumanTimeString;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use std::time::{Duration, Instant};
 
 use crate::enums::{TempUnit, TimeFormat};
@@ -51,6 +52,7 @@ pub struct Battery {
     pub time_to_full: Option<String>,
     /// The format for displaying time.
     pub time_format: TimeFormat,
+
     /// The unit for displaying temperature.
     pub temp_unit: TempUnit,
     /// The last time the battery information was refreshed.
@@ -233,7 +235,12 @@ impl Battery {
         temp_unit: TempUnit,
         refresh_interval: u64,
     ) -> PyResult<Self> {
-        Battery::get_battery_info(index, time_format, temp_unit, Duration::from_millis(refresh_interval))
+        Battery::get_battery_info(
+            index,
+            time_format,
+            temp_unit,
+            Duration::from_millis(refresh_interval),
+        )
     }
 
     /// Gets/sets the refresh interval.
@@ -361,6 +368,12 @@ impl Battery {
         Ok(self.time_to_full.clone())
     }
 
+    #[getter]
+    fn hello(&mut self) -> PyResult<String> {
+        self.refresh_if_needed()?;
+        Ok("hello".to_string())
+    }
+
     /// Refreshes the battery information.
     ///
     /// # Arguments
@@ -373,7 +386,12 @@ impl Battery {
     #[pyo3(signature = (index=None))]
     fn refresh(&mut self, index: Option<usize>) -> PyResult<()> {
         // println!("Refreshing battery information...");
-        let battery = Battery::get_battery_info(index, self.time_format, self.temp_unit, self.refresh_interval)?;
+        let battery = Battery::get_battery_info(
+            index,
+            self.time_format,
+            self.temp_unit,
+            self.refresh_interval,
+        )?;
         // Only update the fields that could possibly change.
         self.percent_full = battery.percent_full;
         self.state = battery.state;
@@ -388,5 +406,48 @@ impl Battery {
         self.time_to_empty = battery.time_to_empty;
         self.time_to_full = battery.time_to_full;
         Ok(())
+    }
+
+    /// Returns all battery information as a Python dictionary.
+    fn as_dict(&self, py: Python) -> PyResult<Py<PyDict>> {
+        let dict = PyDict::new(py);
+
+        dict.set_item("vendor", self.vendor.clone())?;
+        dict.set_item("model", self.model.clone())?;
+        dict.set_item("serial_number", self.serial_number.clone())?;
+        dict.set_item("technology", self.technology.clone())?;
+        dict.set_item("percent", (self.percent_full.value, self.percent_full.units.clone()))?;
+        dict.set_item("state", format!("{}", self.state))?;
+        dict.set_item("capacity", (self.capacity.value, self.capacity.units.clone()))?;
+        dict.set_item(
+            "temperature",
+            self.temperature
+                .as_ref()
+                .map(|t| (t.value, t.units.clone()))
+                .unwrap_or_default(),
+        )?;
+        dict.set_item(
+            "cycle_count",
+            self.cycle_count.map(|c| c.to_string()).unwrap_or_default(),
+        )?;
+        dict.set_item("energy", (self.energy.value, self.energy.units.clone()))?;
+        dict.set_item("energy_full", (self.energy_full.value, self.energy_full.units.clone()))?;
+        dict.set_item(
+            "energy_full_design",
+            (self.energy_full_design.value, self.energy_full_design.units.clone()),
+        )?;
+        dict.set_item("energy_rate", (self.energy_rate.value, self.energy_rate.units.clone()))?;
+        dict.set_item("voltage", (self.voltage.value, self.voltage.units.clone()))?;
+        dict.set_item(
+            "time_to_empty",
+            self.time_to_empty.clone().unwrap_or_default(),
+        )?;
+        dict.set_item(
+            "time_to_full",
+            self.time_to_full.clone().unwrap_or_default(),
+        )?;
+        dict.set_item("battery_index", self.battery_index)?;
+
+        Ok(dict.into())
     }
 }

@@ -1,11 +1,11 @@
 [package]
 name = "batteryinfo-py"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 description = "A Python module written in rust for battery information"
-authors = ["Dave Johnson <thisdavej@gmail.com>"]
+authors = ["Dave Johnson <dave@thisdavej.com>"]
 license = "MIT"
-repository = "https://github.com/thisdavej/batteeryinfo-py"
+repository = "https://github.com/thisdavej/batteryinfo-py"
 readme = "README.md"
 keywords = ["python", "module", "battery", "information"]
 
