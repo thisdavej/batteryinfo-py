@@ -2,6 +2,8 @@
 
 This project provides cross-platform Python bindings specifically designed to access system battery information. Using the Rust `battery` crate as its foundation, it allows you to retrieve battery status, percent full, capacity, and more, regardless of the operating system.
 
+You can find more details and examples related to this project in my blog post [here](https://thisdavej.com/batteryinfo-a-rust-powered-python-package-for-laptop-battery-monitoring/).
+
 ## Setup
 
 ### Python
