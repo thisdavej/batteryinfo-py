@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "batteryinfo"
-version = "0.1.4"
+version = "0.1.5"
 description = "A Python module written in rust for battery information"
 authors = [{ name = "Dave Johnson", email = "dave@thisdavej.com" }]
 license = "MIT"
