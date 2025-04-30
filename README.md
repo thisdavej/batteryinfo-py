@@ -201,7 +201,7 @@ print("Energy:", battery_info.get("energy"))    # Example: (50.0, "Wh")
 battery = batteryinfo.Battery()
 
 state = battery.state
-percent = battery.percent.value
+percent = f"{battery.percent.value}%"
 if state == "Charging":
     time_to_full = battery.time_to_full
     print(f"Battery: {percent} (⇡ charging - full in {time_to_full})")
